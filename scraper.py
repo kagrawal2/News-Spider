@@ -8,7 +8,10 @@ today = time.strftime("%d_%m_%Y")
 print(today)
 
 ReportsFolder = "/Users/kireet/Projects/NewsScraper/Reports"
-reportFile = ReportsFolder + "/" + today + '_Report.txt'
+reportFile = ReportsFolder + "/" + today + '_Report.html'
+with open(reportFile, 'w') as report:
+    report.write('<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head><body>')
+    report.close()
 
 
 def techCrunch(url):
@@ -19,7 +22,8 @@ def techCrunch(url):
     trending = soup.find_all(attrs={'class': 'trending-post'})
     # titleLinks = []
     tabooWords = ["how", 'we', 'you', "?", 'your']
-    with open(reportFile, 'w') as report:
+    with open(reportFile, 'a') as report:
+        report.write('<h2>Technology News</h2>')
         for title in titles:
             titleText = title.text.replace('\n', "").replace("\xa0", " ")
             # print(titleText.lower())
@@ -39,35 +43,17 @@ def techCrunch(url):
                 except:
                     print("Error at: " + paragraphs)
 
-                report.write(titleText + '\n')
-
+                report.write('<p><b>'  + titleText + '</b></p>')
+                report.write('<p>')
                 i = 0
                 while i < 6 or len(sentences[i]) < 5:
-                    report.write(sentences[i] + '.')
-
-
+                    report.write(sentences[i] + '. ')
                     i += 1
-                report.write('\n\n')
+                report.write('</p>')
 
-
+        report.write("</body></html>")
 
 techCrunch('https://techcrunch.com/startups/')
-
-
-            
-        
-    # for link in titleLinks[0:1]:
-    #     spiderResponse = requests.get(link[1])
-    #     spiderHtml = spiderResponse.content
-    #     spiderSoup = BeautifulSoup(spiderHtml)
-    #     paragraphs = spiderSoup.find(attrs={'class': 'article-entry text'})
-
-    #     try:
-    #         print(paragraphs.text.replace('\n', "").replace("\xa0", " ").split('.'))
-    #     except:
-    #         print("Error at: " + paragraphs)
-
-    # print(titleLinks)
 
 
 def marketReports():
@@ -77,45 +63,42 @@ def marketReports():
     soup = BeautifulSoup(html)
     articleList = soup.find(attrs={"class":"articlelist clear"})
     articleList = articleList.find_all('li')
-
-    titleLinks = []
     tabooWords = ["how", 'we', '?', 'you']
 
-    for article in articleList:
-        if any(word not in article.text.lower() for word in tabooWords): # add Naive Bayes classification algorithm here
+    with open(reportFile, 'a') as report:
+        report.write('<h2>Market News</h2>')
+        for article in articleList:
             try:
-                titleLinks.append([article.text.split('\n\n')[3].replace("\xa0", " "), article.find('a', href=True)['href']])
+                articleText = article.text.split('\n\n')[3].replace("\xa0", " ")
+                if any(word not in articleText.lower() for word in tabooWords): # add Naive Bayes classification algorithm here
+                    link = article.find('a', href=True)['href']
+                    spiderResponse = requests.get(link)
+                    spiderHtml = spiderResponse.content
+                    spiderSoup = BeautifulSoup(spiderHtml)
+                    paragraphs = spiderSoup.find(attrs={'class': 'stri-full'})
+                    sentences = []
+                    try:
+                        sentences = paragraphs.text.replace('\n', "").replace("\xa0", " ").split('.')
+                        report.write('<p><b>'  + articleText + '</b></p>')
+                        report.write('<p>')
+                        i = 0
+                        while i < 6 or len(sentences[i]) < 5:
+                            report.write(sentences[i] + '. ')
+                            i += 1
+                        report.write('</p>')
+
+                    except Exception as err:
+                        print(err)
+
+                        
             except:
                 continue
-    # print(titleLinks)
 
-    for link in titleLinks[0:1]:
-        spiderResponse = requests.get(link[1])
-        spiderHtml = spiderResponse.content
-        spiderSoup = BeautifulSoup(spiderHtml)
-        paragraphs = spiderSoup.find(attrs={'class': 'stri-full'})
         
-        try:
-            print(paragraphs.text.replace('\n', "").replace("\xa0", " ").split('.'))
-        except:
-            print("Error at: " + paragraphs)
+marketReports()
 
-# marketReports()
-
-# 
-
-
-
-
-    # nestedTable = table.find('td')
-    # rows = nestedTable.find_all('tr')
-
-    # print(rows.find_all('td'))
-
-    # headers = [header.text for header in rows.find_all('th')]
-    # data = [td.get_text().strip() for td in rows.find_all('td')]
-    # headers = [th.get_text().strip() for th in soup.find_all('th')]
-    # print(headers)
-    # tabledata = [td.get_text().strip() for td in soup.find_all(attrs={"class":"yfnc_tabledata1"})]
-
+with open(reportFile, 'a') as report:
+    report.write("</body></html>")
+    report.close()
+                
 
