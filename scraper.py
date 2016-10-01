@@ -4,7 +4,7 @@ import re
 import time
 
 
-today = time.strftime("%d_%m_%Y")
+today = time.strftime("%m_%d_%Y")
 print(today)
 
 ReportsFolder = "/Users/kireet/Projects/NewsScraper/Reports"
